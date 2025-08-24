@@ -20,16 +20,41 @@ class TaskController extends Controller
     /**
      * @OA\Get(
      *     path="/api/tasks",
-     *     summary="Get all tasks",
+     *     summary="Get all tasks with pagination",
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         description="Page number",
+     *         required=false,
+     *         @OA\Schema(type="integer", default=1)
+     *     ),
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="Number of tasks per page",
+     *         required=false,
+     *         @OA\Schema(type="integer", default=10)
+     *     ),
      *     @OA\Response(
      *         response=200,
-     *         description="Task list"
+     *         description="Paginated list of tasks",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="array",
+     *                 @OA\Items(ref="#/components/schemas/Task")
+     *             ),
+     *             @OA\Property(property="current_page", type="integer"),
+     *             @OA\Property(property="last_page", type="integer"),
+     *             @OA\Property(property="per_page", type="integer"),
+     *             @OA\Property(property="total", type="integer")
+     *         )
      *     )
      * )
      */
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        return response()->json(Task::all());
+        $perPage = (int) $request->query('per_page', 10);
+        $tasks = Task::paginate($perPage);
+        return response()->json($tasks);
     }
 
     /**
