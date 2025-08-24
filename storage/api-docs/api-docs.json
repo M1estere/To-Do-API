@@ -2,7 +2,7 @@
     "openapi": "3.0.0",
     "info": {
         "title": "To-Do API",
-        "description": "API for tasks management",
+        "description": "API for task management",
         "version": "1.0.0"
     },
     "paths": {
@@ -49,6 +49,22 @@
                 "responses": {
                     "201": {
                         "description": "Task created"
+                    },
+                    "409": {
+                        "description": "Task already exists",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Task already exists"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -118,7 +134,36 @@
                         "description": "Task updated"
                     },
                     "404": {
-                        "description": "Task not found"
+                        "description": "Task not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Task not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Task already exists",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Task already exists"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 }
             },

@@ -48,12 +48,29 @@ class TaskController extends Controller
      *     @OA\Response(
      *         response=201,
      *         description="Task created"
+     *     ),
+     *     @OA\Response(
+     *         response=409,
+     *         description="Task already exists",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Task already exists")
+     *         )
      *     )
      * )
      */
     public function store(TaskRequest $request)
     {
-        $task = Task::create($request->validated());
+        $validated = $request->validated();
+
+        $exists = Task::where('title', $validated['title'])
+                    ->exists();
+
+        if ($exists) {
+            return response()->json(['message' => "Task `{$validated['title']}` already exists"], 409);
+        }
+
+        $task = Task::create($validated);
+
         return response()->json($task, 201);
     }
 
@@ -100,8 +117,24 @@ class TaskController extends Controller
      *             @OA\Property(property="status", type="string", example="completed")
      *         )
      *     ),
-     *     @OA\Response(response=200, description="Task updated"),
-     *     @OA\Response(response=404, description="Task not found")
+     *     @OA\Response(
+     *         response=200,
+     *         description="Task updated"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Task not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Task not found")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=409,
+     *         description="Task already exists",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Task already exists")
+     *         )
+     *     )
      * )
      */
     public function update(TaskRequest $request, $id)
@@ -112,7 +145,18 @@ class TaskController extends Controller
             return response()->json(['message' => 'Task not found'], 404);
         }
 
-        $task->update($request->validated());
+        $validated = $request->validated();
+
+        // Проверка на дубликат, исключая текущую запись
+        $exists = Task::where('title', $validated['title'] ?? $task->title)
+                    ->exists();
+
+        if ($exists) {
+            return response()->json(['message' => "Task `{$validated['title']}` already exists"], 409);
+        }
+
+        $task->update($validated);
+
         return response()->json($task);
     }
 
